@@ -6,8 +6,8 @@ import multer from 'multer';
 import path from 'path';
 import {Server} from 'socket.io';
 import {fileURLToPath} from 'url';
-import {createChat, getAllChats, getChatById, saveMessage} from './services/chatStore.js';
-import {chatWithPDF, processPDF, translatePDF} from './services/rag.js';
+import {createChat, getAllChats, getChatById, saveMessage, deleteChat, updateChatTitle} from './services/chatStore.js';
+import {chatWithPDF, processPDF, summarizeDocument, translatePDF, translateAIResponse} from './services/rag.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -78,6 +78,25 @@ app.get('/api/chats/:id', (req, res) => {
     res.json(chat);
 });
 
+app.delete('/api/chats/:id', (req, res) => {
+    const success = deleteChat(req.params.id);
+    if (success) {
+        res.json({message: 'Chat deleted'});
+    } else {
+        res.status(404).json({error: 'Chat not found'});
+    }
+});
+
+app.put('/api/chats/:id', (req, res) => {
+    const {title} = req.body;
+    const chat = updateChatTitle(req.params.id, title);
+    if (chat) {
+        res.json({message: 'Chat updated', chat});
+    } else {
+        res.status(404).json({error: 'Chat not found'});
+    }
+});
+
 // Socket.io for Chat
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
@@ -112,6 +131,26 @@ io.on('connection', (socket) => {
         } catch (error) {
             console.error('Chat error:', error);
             socket.emit('error', {message: 'Failed to generate response'});
+        }
+    });
+
+    socket.on('summarize_document', async () => {
+        try {
+            socket.emit('summary_start', {message: 'Generating summary...'});
+            const summary = await summarizeDocument();
+            socket.emit('summary_complete', {summary});
+        } catch (error) {
+            console.error('Summary error:', error);
+            socket.emit('error', {message: 'Summarization failed'});
+        }
+    });
+
+    socket.on('translate_ai_response', async (data) => {
+        try {
+            const translated = await translateAIResponse(data.text, data.language);
+            socket.emit('ai_response_translated', {text: translated});
+        } catch (error) {
+            console.error('AI translation error:', error);
         }
     });
 

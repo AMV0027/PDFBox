@@ -28,7 +28,7 @@ export const getAllChats = () => {
 
             return {
                 id: chatData.id,
-                title: firstMessage.substring(0, 50) + (firstMessage.length > 50 ? '...' : ''),
+                title: chatData.customTitle || firstMessage.substring(0, 50) + (firstMessage.length > 50 ? '...' : ''),
                 timestamp: stats.mtime,
                 messageCount: chatData.messages ? chatData.messages.length : 0
             };
@@ -91,5 +91,34 @@ const saveChat = (chat) => {
         fs.writeFileSync(filePath, JSON.stringify(chat, null, 2));
     } catch (error) {
         console.error(`Error saving chat ${chat.id}:`, error);
+    }
+};
+
+export const deleteChat = (id) => {
+    try {
+        const filePath = path.join(STORAGE_DIR, `${id}.json`);
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.error(`Error deleting chat ${id}:`, error);
+        return false;
+    }
+};
+
+export const updateChatTitle = (id, newTitle) => {
+    try {
+        const chat = getChatById(id);
+        if (chat) {
+            chat.customTitle = newTitle;
+            saveChat(chat);
+            return chat;
+        }
+        return null;
+    } catch (error) {
+        console.error(`Error updating chat ${id}:`, error);
+        return null;
     }
 };

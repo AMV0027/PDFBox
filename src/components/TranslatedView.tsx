@@ -1,48 +1,51 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
+import { ScrollArea } from "./ui/scroll-area";
+import { getLabels } from "../lib/translations";
 
 interface TranslatedViewProps {
 	pages: string[];
 	onClose: () => void;
+	language: string;
 }
 
-export function TranslatedView({ pages, onClose }: TranslatedViewProps) {
+export function TranslatedView({ pages, onClose, language }: TranslatedViewProps) {
 	const [pageNumber, setPageNumber] = useState<number>(1);
 	const numPages = pages.length;
 
+	const labels = getLabels(language);
+
 	return (
-		<div className="flex flex-col h-full bg-gray-50 border-r border-gray-200">
-			<div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
-				<h2 className="font-semibold text-gray-800">Translated Document</h2>
-				<button
-					onClick={onClose}
-					className="text-sm text-blue-600 hover:text-blue-800 font-medium px-3 py-1 rounded hover:bg-blue-50">
-					Back to Original
-				</button>
-			</div>
+		<div className="flex flex-col h-full bg-background border-r">
+			<header className="flex items-center justify-between p-4 border-b bg-card">
+				<h2 className="font-semibold tracking-tight text-foreground">{labels.translatedDoc}</h2>
+				<Button variant="outline" size="sm" onClick={onClose} className="text-primary hover:text-primary">
+					{labels.backToOriginal}
+				</Button>
+			</header>
 
-			<div className="flex-1 overflow-auto p-8 flex justify-center bg-gray-100">
-				<div className="bg-white shadow-lg p-10 max-w-3xl w-full min-h-[800px] text-gray-800 leading-relaxed whitespace-pre-wrap">
-					{pages[pageNumber - 1]}
+			<ScrollArea className="flex-1 bg-muted/30">
+				<div className="flex justify-center p-8 min-h-full">
+					<Card className="max-w-3xl w-full min-h-[800px] shadow-sm">
+						<CardContent className="p-10 text-foreground leading-relaxed whitespace-pre-wrap text-base">
+							{pages[pageNumber - 1]}
+						</CardContent>
+					</Card>
 				</div>
-			</div>
+			</ScrollArea>
 
-			<div className="p-4 border-t border-gray-200 bg-white flex items-center justify-center gap-4">
-				<button
-					disabled={pageNumber <= 1}
-					onClick={() => setPageNumber((p) => p - 1)}
-					className="p-2 hover:bg-[#1d4ed8] rounded disabled:opacity-50 text-white">
-					<ChevronLeft size={20} />
-				</button>
-				<span className="text-sm font-medium">
-					Page {pageNumber} of {numPages}
+			<div className="p-3 border-t bg-card flex items-center justify-center gap-4">
+				<Button variant="outline" size="icon" disabled={pageNumber <= 1} onClick={() => setPageNumber((p) => p - 1)}>
+					<ChevronLeft size={16} />
+				</Button>
+				<span className="text-sm font-medium text-muted-foreground min-w-24 text-center">
+					{labels.pageOf.replace("{p}", pageNumber.toString()).replace("{t}", numPages.toString())}
 				</span>
-				<button
-					disabled={pageNumber >= numPages}
-					onClick={() => setPageNumber((p) => p + 1)}
-					className="p-2 hover:bg-[#1d4ed8] rounded disabled:opacity-50 text-white">
-					<ChevronRight size={20} />
-				</button>
+				<Button variant="outline" size="icon" disabled={pageNumber >= numPages} onClick={() => setPageNumber((p) => p + 1)}>
+					<ChevronRight size={16} />
+				</Button>
 			</div>
 		</div>
 	);

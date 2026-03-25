@@ -4,6 +4,7 @@ import { ChatHistorySidebar } from "./components/ChatHistorySidebar";
 import { ChatInterface } from "./components/ChatInterface";
 import { PDFViewer } from "./components/PDFViewer";
 import { TranslatedView } from "./components/TranslatedView";
+import { LANGUAGES } from "./lib/translations";
 
 function App() {
 	const [socket, setSocket] = useState<Socket | null>(null);
@@ -11,19 +12,15 @@ function App() {
 	const [uploadedFilename, setUploadedFilename] = useState<string | null>(null);
 	const [isUploading, setIsUploading] = useState(false);
 	const [translatedPages, setTranslatedPages] = useState<string[] | null>(null);
-	const [isTranslating, setIsTranslating] = useState(false);
 
 	const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+	const [language, setLanguage] = useState("english");
 
 	useEffect(() => {
-		// Connect to backend
-		const newSocket = io("http://localhost:3001");
+		const newSocket = io("http://localhost:8888");
 		setSocket(newSocket);
-
-		// Create a new chat session automatically if none exists
 		createNewChat();
-
 		return () => {
 			newSocket.disconnect();
 		};
@@ -31,7 +28,7 @@ function App() {
 
 	const createNewChat = async () => {
 		try {
-			const response = await fetch("http://localhost:3001/api/chats", { method: "POST" });
+			const response = await fetch("http://localhost:8888/api/chats", { method: "POST" });
 			if (response.ok) {
 				const chat = await response.json();
 				setCurrentSessionId(chat.id);
@@ -47,14 +44,14 @@ function App() {
 		formData.append("pdf", file);
 
 		try {
-			const response = await fetch("http://localhost:3001/api/upload", {
+			const response = await fetch("http://localhost:8888/api/upload", {
 				method: "POST",
 				body: formData,
 			});
 
 			if (response.ok) {
 				const data = await response.json();
-				setPdfFile(file); // Display local file
+				setPdfFile(file);
 				setUploadedFilename(data.filename);
 				setTranslatedPages(null);
 			} else {
@@ -72,58 +69,62 @@ function App() {
 	const handleTranslationRequest = (message: string) => {
 		const lowerMsg = message.toLowerCase();
 		if (lowerMsg.includes("translate") && uploadedFilename) {
-			const languages = [
-				"spanish",
-				"french",
-				"german",
-				"italian",
-				"portuguese",
-				"chinese",
-				"japanese",
-				"hindi",
-				"kannada",
-			];
-			const targetLang = languages.find((l) => lowerMsg.includes(l));
+			// Extract language codes to check against
+			const languageCodes = LANGUAGES.map(l => l.code).filter(c => c !== "english");
+			const targetLang = languageCodes.find((l) => lowerMsg.includes(l));
 
 			if (targetLang) {
-				setIsTranslating(true);
 				socket?.emit("translate_document", { language: targetLang, filename: uploadedFilename });
 			}
 		}
 	};
 
+	useEffect(() => {
+		if (socket) {
+			socket.on("translation_complete", (data: { pages: string[] }) => {
+				setTranslatedPages(data.pages);
+			});
+			socket.on("error", (err: any) => {
+				console.error("Socket error:", err);
+			});
+		}
+		return () => {
+			socket?.off("translation_complete");
+			socket?.off("error");
+		}
+	}, [socket]);
+
 	return (
-		<div className="flex h-screen w-screen overflow-hidden bg-gray-100 font-sans text-gray-900 relative">
+		<div className="flex h-screen w-screen overflow-hidden bg-background font-sans text-foreground">
 			<ChatHistorySidebar
 				isOpen={isSidebarOpen}
 				onClose={() => setIsSidebarOpen(false)}
 				onSelectChat={setCurrentSessionId}
 				onNewChat={createNewChat}
 				currentChatId={currentSessionId}
+				language={language}
 			/>
 
 			{/* Left Side: PDFBox */}
-			<div className="w-1/2 h-full border-r border-gray-300 bg-white">
-				{translatedPages ?
-					<TranslatedView
-						pages={translatedPages}
-						onClose={() => setTranslatedPages(null)}
-					/>
-				:	<PDFViewer
-						file={pdfFile}
-						onOpenSidebar={() => setIsSidebarOpen(true)}
-					/>
-				}
+			<div className="w-1/2 h-full bg-card">
+				{translatedPages ? (
+					<TranslatedView pages={translatedPages} onClose={() => setTranslatedPages(null)} language={language} />
+				) : (
+					<PDFViewer file={pdfFile} onOpenSidebar={() => setIsSidebarOpen(true)} language={language} />
+				)}
 			</div>
 
 			{/* Right Side: Chat Interface */}
-			<div className="w-1/2 h-full bg-white">
+			<div className="w-1/2 h-full bg-card border-l">
 				<ChatInterface
 					socket={socket}
 					onFileUpload={handleFileUpload}
 					isUploading={isUploading}
 					onMessageSent={handleTranslationRequest}
 					sessionId={currentSessionId}
+					uploadedFilename={uploadedFilename}
+					language={language}
+					onLanguageChange={setLanguage}
 				/>
 			</div>
 		</div>
