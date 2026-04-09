@@ -25,7 +25,11 @@ const httpServer = createServer(app);
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+  }),
+);
 app.use(express.json());
 
 // Upload setup
@@ -106,7 +110,8 @@ app.post("/api/tts", async (req, res) => {
 // POST Endpoints replacing Socket.io
 app.post("/api/chat", async (req, res) => {
   const { message, history, sessionId } = req.body;
-  if (!message || !sessionId) return res.status(400).json({ error: "Missing message or sessionId" });
+  if (!message || !sessionId)
+    return res.status(400).json({ error: "Missing message or sessionId" });
 
   try {
     const response = await chatWithPDF(message, history, sessionId);
@@ -132,7 +137,8 @@ app.post("/api/summarize", async (req, res) => {
 
 app.post("/api/translate_response", async (req, res) => {
   const { text, language } = req.body;
-  if (!text || !language) return res.status(400).json({ error: "Missing text or language" });
+  if (!text || !language)
+    return res.status(400).json({ error: "Missing text or language" });
 
   try {
     const translated = await translateAIResponse(text, language);
@@ -148,7 +154,9 @@ app.post("/api/translate_document", async (req, res) => {
   const uploadDir = path.join(__dirname, "uploads");
 
   if (!filename || !language) {
-    return res.status(400).json({ error: "No file or language specified for translation" });
+    return res
+      .status(400)
+      .json({ error: "No file or language specified for translation" });
   }
 
   const safeFilename = path.basename(filename);
