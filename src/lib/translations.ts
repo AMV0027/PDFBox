@@ -162,22 +162,22 @@ export const UI_LABELS: Record<string, Record<string, string>> = {
 };
 
 export const LANGUAGES = [
-  { code: "english", label: "English" },
-  { code: "hindi", label: "हिन्दी" },
-  { code: "bengali", label: "বাংলা" },
-  { code: "telugu", label: "తెలుగు" },
-  { code: "marathi", label: "मराठी" },
-  { code: "tamil", label: "தமிழ்" },
-  { code: "kannada", label: "ಕನ್ನಡ" },
-  { code: "gujarati", label: "ગુજરાતી" },
-  { code: "malayalam", label: "മലയാളം" },
-  { code: "odia", label: "ଓଡ଼ିଆ" },
-  { code: "punjabi", label: "ਪੰਜਾਬੀ" },
-  { code: "urdu", label: "اردو" },
-  { code: "assamese", label: "অসমীয়া" },
-  { code: "sanskrit", label: "संस्कृतम्" },
-  { code: "maithili", label: "मैथिली" },
-  { code: "konkani", label: "कोंकणी" }
+  { code: "english", label: "English", bcp47: "en-IN" },
+  { code: "hindi", label: "हिन्दी", bcp47: "hi-IN" },
+  { code: "bengali", label: "বাংলা", bcp47: "bn-IN" },
+  { code: "telugu", label: "తెలుగు", bcp47: "te-IN" },
+  { code: "marathi", label: "मराठी", bcp47: "mr-IN" },
+  { code: "tamil", label: "தமிழ்", bcp47: "ta-IN" },
+  { code: "kannada", label: "ಕನ್ನಡ", bcp47: "kn-IN" },
+  { code: "gujarati", label: "ગુજરાતી", bcp47: "gu-IN" },
+  { code: "malayalam", label: "മലയാളം", bcp47: "ml-IN" },
+  { code: "odia", label: "ଓଡ଼ିଆ", bcp47: "or-IN" },
+  { code: "punjabi", label: "ਪੰਜਾਬੀ", bcp47: "pa-IN" },
+  { code: "urdu", label: "اردو", bcp47: "ur-IN" },
+  { code: "assamese", label: "অসমীয়া", bcp47: "as-IN" },
+  { code: "sanskrit", label: "संस्कृतम्", bcp47: "sa-IN" },
+  { code: "maithili", label: "मैथिली", bcp47: "mai-IN" },
+  { code: "konkani", label: "कोंकणी", bcp47: "kok-IN" }
 ];
 
 export function getLabels(lang: string) {
