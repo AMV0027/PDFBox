@@ -11,6 +11,7 @@ import {
   VolumeX,
   StopCircle,
 } from "lucide-react";
+import { Bot } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import ReactMarkdown from "react-markdown";
@@ -417,21 +418,21 @@ export function ChatInterface({
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4 overflow-auto w-full">
-        <div className="space-y-4 pb-12 overflow-scroll w-full">
+      <ScrollArea className="flex-1 p-4 overflow-auto w-auto">
+        <div className="space-y-4 pb-12 w-full max-w-3xl mx-auto">
           {messages.map((msg) => (
             <div
               key={msg.id}
               className={`flex w-full group ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               {msg.role === "ai" && (
-                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mr-2.5 shrink-0 mt-0.5 border border-primary/20">
-                  <span className="text-[11px]">✨</span>
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-2.5 shrink-0 mt-0.5 border border-primary/20">
+                  <Bot size={18} />
                 </div>
               )}
 
               <div
-                className={`relative flex flex-col max-w-[85%] ${
+                className={`relative flex flex-col max-w-[calc(100%-32px)] sm:max-w-[85%] ${
                   msg.role === "user" ? "items-end" : "items-start"
                 }`}
               >
@@ -446,7 +447,7 @@ export function ChatInterface({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className={`absolute -right-8 top-0 h-6 w-6 transition-opacity ${playingMessageId === msg.id ? "opacity-100 text-destructive hover:text-destructive/80" : "opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground"}`}
+                      className={`absolute -right-7 sm:-right-8 top-0 h-6 w-6 transition-opacity ${playingMessageId === msg.id ? "opacity-100 text-destructive hover:text-destructive/80" : "opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground"}`}
                       onClick={() => toggleSpeech(msg.id, msg.content)}
                       title={
                         playingMessageId === msg.id
@@ -461,34 +462,23 @@ export function ChatInterface({
                       )}
                     </Button>
                   )}
-                  <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-1.5 prose-headings:my-2.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5">
+                  <div
+                    className={`prose prose-h1:text-sm prose-sm w-full dark:prose-invert prose-p:my-1.5 prose-headings:my-2.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 ${
+                      msg.role === "user" ? "text-white" : "text-foreground"
+                    }`}
+                  >
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
-                        code({ node, className, children, ...props }: any) {
-                          const match = /language-(\w+)/.exec(className || "");
-                          return match ? (
-                            <code className={className} {...props}>
-                              {children}
-                            </code>
-                          ) : (
-                            <code
-                              className="bg-muted/80 text-foreground px-1.5 py-0.5 rounded border text-[11.5px] font-mono before:hidden after:hidden"
-                              {...props}
-                            >
-                              {children}
-                            </code>
+                        code({ children }: any) {
+                          return (
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {String(children)}
+                            </ReactMarkdown>
                           );
                         },
-                        pre({ node, children, ...props }: any) {
-                          return (
-                            <pre
-                              className="overflow-x-auto text-[11.5px] font-mono !bg-muted/50 p-3 rounded-lg border border-border/50 !text-foreground my-2"
-                              {...props}
-                            >
-                              {children}
-                            </pre>
-                          );
+                        pre({ children }: any) {
+                          return <>{children}</>;
                         },
                       }}
                     >

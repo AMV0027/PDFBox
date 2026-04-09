@@ -93,10 +93,9 @@ function App() {
 
 
 	return (
-		<div className="flex h-screen w-screen overflow-hidden bg-background font-sans text-foreground">
-
+		<div className="flex flex-col lg:flex-row h-screen w-screen overflow-hidden bg-background font-sans text-foreground">
 			{/* Left Side: PDFBox */}
-			<div className="w-1/2 h-full bg-card">
+			<div className="w-full h-1/2 lg:w-1/2 lg:h-full bg-card overflow-hidden">
 				{translatedPages ? (
 					<TranslatedView pages={translatedPages} onClose={() => setTranslatedPages(null)} language={language} />
 				) : (
@@ -110,7 +109,7 @@ function App() {
 			</div>
 
 			{/* Right Side: Chat Interface */}
-			<div className="w-1/2 h-full bg-card border-l">
+			<div className="w-full h-1/2 lg:w-1/2 lg:h-full bg-card border-t lg:border-t-0 lg:border-l overflow-hidden">
 				<ChatInterface
 					onFileUpload={handleFileUpload}
 					isUploading={isUploading}
